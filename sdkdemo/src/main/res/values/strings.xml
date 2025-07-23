@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TenMax Beacon Demo</string>
+    <string name="notification_detail">通知詳情</string>
+    <string name="no_url_provided">未提供 URL</string>
+
+    <!-- Main Page (P1) strings -->
+    <string name="main_title_1">TenMax Beacon SDK 簡介</string>
+    <string name="main_content_1">TenMax Beacon SDK 為了協助企業主做到虛實整合的效果，讓企業主投遞 Outdoor 戶外廣告時，能與使用者的行動裝置產生即時互動。\n\n整合 TenMax Beacon SDK 至 App 後，當 APP 使用者靠近設有 Outdoor 戶外廣告設備，且廣告播放指定內容時，若使用者的 App 正於背景執行，即可根據 Outdoor 戶外廣告播放的指定廣告素材觸發對應的推播訊息，進一步提升互動機會，打造虛實整合的互動體驗。</string>
+
+    <string name="main_title_2">TenMax Beacon SDK 會取得的資料</string>
+    <string name="main_content_2">TenMax Beacon SDK 在整合至企業主的 App 後，會依據使用情境與使用者授權，取得以下幾項裝置資訊，以實現虛實整合的推播互動功能：\n\n1. 裝置系統類型（platform）：識別使用者所使用的行動系統為 iOS 或 Android，為必要欄位。\n2. App 名稱（appName）：取得目前執行中的應用程式名稱，作為來源識別之用，為必要欄位。\n3. 手機型號（deviceMode）：用於了解使用者裝置規格，例如 iPhone 14 Pro、Samsung Galaxy S21 等，為必要欄位。\n4. 裝置識別碼（deviceId）：包含 iOS 的 IDFA 或 Android 的 ADID，這是用於廣告識別與追蹤的欄位。此欄位非必填，但若可取得，能協助提升廣告追蹤與投遞精準度。\n5. 使用者電話號碼（phoneNumber）：此欄位僅在使用者授權同意的前提下才會被蒐集，非必填。\n6. 使用者 Email（email）：此欄位僅在使用者授權同意的前提下才會被蒐集，非必填。\n其中 deviceId、phoneNumber 及 email 為選填欄位，可依企業實際需求與隱私政策選擇是否提供。若未提供這些資料，SDK 核心功能仍可正常運作，不會影響推播互動的基本流程。</string>
+
+    <string name="main_title_3">TenMax Beacon SDK 具體的行為</string>
+    <string name="main_content_3">TenMax Beacon SDK 僅針對 TenMax AD Player 的藍牙訊號進行被動掃描，其監控行為包含以下幾點：\n\n1. 啟用藍牙掃描功能\n\n當 APP 使用者裝置開啟系統藍牙功能，SDK 將啟動藍牙掃描行為，用於識別指定的藍牙訊號。\n\n2. 接收 TenMax AD Player 的藍牙訊號\n\nSDK 會被動接收來自 TenMax AD Player 的藍牙訊號，其中包含三組識別資訊：\n\n- 公司識別碼 ( Company ID )\n\n- 廣告空間 ( Space ID )\n\n- 素材 ( Creative ID )\n\n這些訊息皆為公開廣播內容，並非裝置私有資訊。</string>
+
+    <!-- User data input strings -->
+    <string name="user_data_title">7. 輸入後可以讓 TenMax 開發者確認可以正確收到 email 、手機號碼</string>
+    <string name="email_input_label">輸入您的 email</string>
+    <string name="phone_input_label">輸入您的手機號碼</string>
+    <string name="submit_button">送出</string>
+
+    <!-- Congratulations Page (P2) strings -->
+    <string name="congratulations_title">恭喜你成功串接 TenMax Beacon SDK</string>
+    <string name="congratulations_content">當您看到這一頁，代表您已成功串接 TenMax Beacon SDK，實現推動虛實整合廣告體驗的重要一步！</string>
+    <string name="data_label">Data : %s</string>
+    <string name="creative_id_label">Creative ID : %s</string>
+</resources>
