@@ -77,8 +77,7 @@
                 android:layout_marginBottom="16dp"
                 android:inputType="textEmailAddress"
                 android:hint="@string/email_input_label"
-                android:padding="12dp"
-                android:background="@android:drawable/edit_text" />
+                android:padding="12dp" />
 
             <EditText
                 android:id="@+id/phoneNumberEditText"
@@ -87,8 +86,7 @@
                 android:layout_marginBottom="16dp"
                 android:inputType="phone"
                 android:hint="@string/phone_input_label"
-                android:padding="12dp"
-                android:background="@android:drawable/edit_text" />
+                android:padding="12dp" />
 
             <Button
                 android:id="@+id/submitButton"
