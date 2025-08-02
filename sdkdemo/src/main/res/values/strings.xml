@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TenMax Beacon Demo</string>
+    <string name="app_name">Beacon Demo</string>
     <string name="notification_detail">通知詳情</string>
     <string name="no_url_provided">未提供 URL</string>
 
