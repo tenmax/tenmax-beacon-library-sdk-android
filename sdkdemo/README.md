@@ -162,12 +162,11 @@ val clientProfile = ClientProfile(
     advertisingId = advertisingId
 )
 
-// 2. Configure SDK with environment
+// 2. Configure SDK
 val sdk = TenMaxAdBeaconSDK.getInstance(applicationContext)
 sdk.initiate(
     clientProfile = clientProfile,
-    callback = this,
-    environment = Environment.STAGE
+    callback = this
 )
 
 // 3. Handle beacon events

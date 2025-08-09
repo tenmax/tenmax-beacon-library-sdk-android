@@ -14,7 +14,7 @@ A Kotlin library for integrating TenMax Beacon tracking functionality into Andro
 - **Beacon Deduplication**: Prevents processing duplicate beacon data within 30-second time windows (configurable)
 - **Network Connectivity**: Automatic network connectivity checking before API calls
 - **Notification Management**: Handles local notifications with click tracking and creative data content support
-- **Environment Support**: Separate configurations for staging and production environments
+
 - **Thread Safety**: All operations are thread-safe with proper concurrent queue management and automatic main thread callback execution
 - **Permission Management**: Comprehensive permission handling for Bluetooth, Location, and Notification permissions
 - **Auto-restart Support**: Automatic SDK restart after device boot
@@ -69,7 +69,6 @@ import com.tenmax.beacon.TenMaxAdBeaconCallback
 import com.tenmax.beacon.model.ClientProfile
 import com.tenmax.beacon.model.TenMaxAdCreative
 import com.tenmax.beacon.model.TenMaxAdBeaconError
-import com.tenmax.beacon.api.Environment
 
 // Create client profile
 val clientProfile = ClientProfile(
@@ -106,8 +105,7 @@ class BeaconCallback : TenMaxAdBeaconCallback {
 val sdk = TenMaxAdBeaconSDK.getInstance(applicationContext)
 sdk.initiate(
     clientProfile = clientProfile,
-    callback = BeaconCallback(),
-    environment = Environment.PRODUCTION
+    callback = BeaconCallback()
 )
 ```
 
@@ -116,7 +114,7 @@ sdk.initiate(
 The SDK follows a specific lifecycle pattern:
 
 1. **getInstance()**: Get SDK singleton instance
-2. **initiate()**: Initialize SDK with client profile, callback, and environment
+2. **initiate()**: Initialize SDK with client profile and callback
 3. **onInitialized()**: Callback triggered when initialization completes
 4. **start()**: Begin beacon scanning (typically called in onInitialized callback)
 5. **isScanning**: Property to check current scanning status (returns true when actively scanning)
@@ -132,14 +130,14 @@ val sdk = TenMaxAdBeaconSDK.getInstance(applicationContext)
 
 if (!sdk.isInitialized) {
     // Safe to initialize
-    sdk.initiate(clientProfile, callback, Environment.PRODUCTION)
+    sdk.initiate(clientProfile, callback)
 } else {
     // Already initialized, can start scanning
     sdk.start()
 }
 ```
 
-**Note**: You must specify the environment (`Environment.STAGE` or `Environment.PRODUCTION`) during initialization. Environment can only be set during initialization and cannot be changed later.
+
 
 ### Advanced Configuration
 
@@ -162,7 +160,6 @@ val notificationConfig = NotificationConfiguration(
 sdk.initiate(
     clientProfile = clientProfile,
     callback = callback,
-    environment = Environment.PRODUCTION,
     notificationConfig = notificationConfig
 )
 ```
