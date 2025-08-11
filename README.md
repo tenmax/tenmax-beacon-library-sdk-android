@@ -35,7 +35,7 @@ For a quick integration, follow these essential steps:
 
 1. **Copy the AAR file to your project**
    ```bash
-   cp libs/beacon-sdk-release.aar your-project/app/libs/
+   cp beacon-sdk-release.aar your-project/libs/
    ```
 
 2. **Configure build.gradle**
