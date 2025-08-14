@@ -11,7 +11,7 @@ A Kotlin library for integrating TenMax Beacon tracking functionality into Andro
 - **Beacon Detection**: Supports Bluetooth Low Energy (BLE) beacon detection with continuous scanning
 - **Background Scanning**: Continues beacon scanning even when the app is in the background using Foreground Service
 - **Frequency Capping**: Intelligent frequency control to prevent spam notifications with configurable intervals
-- **Beacon Deduplication**: Prevents processing duplicate beacon data within 30-second time windows (configurable)
+- **Beacon Deduplication**: Prevents processing duplicate beacon data within 30-second time windows
 - **Network Connectivity**: Automatic network connectivity checking before API calls
 - **Notification Management**: Handles local notifications with click tracking and creative data content support
 
