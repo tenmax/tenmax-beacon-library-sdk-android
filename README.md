@@ -204,7 +204,110 @@ The SDK requires several permissions to function properly:
 - **Foreground Service permissions**: For background scanning
 - **Notification permissions**: For displaying notifications (Android 13+)
 
+**AAR Integration**
+
+When using the pre-built AAR file, **all permissions are automatically merged** from the SDK into your app's final manifest during the build process. **You don't need to declare any permissions manually** in your AndroidManifest.xml:
+
+```xml
+<!-- AndroidManifest.xml -->
+<!-- No permission declarations needed! -->
+<!-- All SDK permissions are automatically merged from beacon-sdk-release.aar -->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.your.app">
+
+    <!-- Your app content only -->
+    <application
+        android:name=".YourApplication"
+        android:label="@string/app_name">
+
+        <!-- Your activities and components -->
+
+    </application>
+</manifest>
+```
+
+**How Permission Merging Works:**
+- Android build system automatically merges all `<uses-permission>` declarations from the AAR
+- Final APK contains all necessary permissions without manual declaration
+- No risk of missing or incorrect permission declarations
+- Automatic updates when SDK permission requirements change
+
 #### Permission Handling Best Practices
+
+**Method 1: Using SDK Built-in PermissionManager (Recommended)**
+
+The SDK provides a built-in `PermissionManager` that handles all permission checking logic:
+
+```kotlin
+import com.tenmax.beacon.PermissionManager
+import androidx.core.app.ActivityCompat
+
+class MainActivity : AppCompatActivity() {
+
+    companion object {
+        private const val PERMISSION_REQUEST_CODE = 100
+    }
+
+    private lateinit var permissionManager: PermissionManager
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // Initialize SDK's PermissionManager
+        permissionManager = PermissionManager(this)
+
+        // Check and request permissions
+        checkPermissions()
+    }
+
+    private fun checkPermissions() {
+        // Use SDK's PermissionManager to check all required permissions
+        val permissionResult = permissionManager.checkRequiredPermissions()
+
+        if (permissionResult.isGranted) {
+            // All permissions granted, initialize SDK
+            initializeSDK()
+        } else {
+            // Request missing permissions
+            ActivityCompat.requestPermissions(
+                this,
+                permissionResult.missingPermissions.toTypedArray(),
+                PERMISSION_REQUEST_CODE
+            )
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            // Re-check permissions after user response
+            val permissionResult = permissionManager.checkRequiredPermissions()
+
+            if (permissionResult.isGranted) {
+                initializeSDK()
+            } else {
+                // Handle permission denial
+                Log.w("BeaconDemo", "Missing permissions: ${permissionResult.missingPermissions}")
+            }
+        }
+    }
+
+    private fun initializeSDK() {
+        // Initialize SDK after all permissions are granted
+        // ... SDK initialization code
+    }
+}
+```
+
+**Method 2: Custom Permission Handling**
+
+If you prefer to implement your own permission handling:
 
 ```kotlin
 import android.Manifest
@@ -213,7 +316,7 @@ import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
-class PermissionManager(private val activity: Activity) {
+class CustomPermissionManager(private val activity: Activity) {
 
     companion object {
         private const val PERMISSION_REQUEST_CODE = 100
