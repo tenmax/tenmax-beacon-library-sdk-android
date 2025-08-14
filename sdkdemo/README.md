@@ -59,7 +59,6 @@ Or install directly to device:
 ## Application Configuration
 - **Namespace**: `com.tenmax.beacon.demo` 
 - **Application ID**: `com.tenmax.beacon.demo.public`
-- **Debug Suffix**: `.debug` (full debug ID: `com.tenmax.beacon.demo.public.debug`)
 
 ## Application Flow
 
@@ -110,15 +109,58 @@ Or install directly to device:
 - Demonstrates notification-to-app flow
 
 ### Permission Management
-The application handles comprehensive permission requests with Android version compatibility:
+
+This demo app uses **AAR integration** (`implementation files('libs/beacon-sdk-release.aar')`), which demonstrates the recommended approach for app integration.
+
+#### No Permission Declaration Needed
+
+With AAR integration, **all permissions are automatically merged** from the SDK into your app's final manifest during the build process. **This demo app's AndroidManifest.xml contains no permission declarations** because they're all handled automatically:
+
+```xml
+<!-- AndroidManifest.xml -->
+<!-- No permission declarations needed! -->
+<!-- All SDK permissions are automatically merged from beacon-sdk-release.aar -->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.tenmax.beacon.demo">
+
+    <!-- Only app-specific content -->
+    <application
+        android:name=".BeaconDemoApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name">
+
+        <!-- Activities and components only -->
+
+    </application>
+</manifest>
+```
+
+#### Automatic Permission Merging
+
+All the following permissions are automatically merged from the AAR without any manual declaration:
+- **Bluetooth permissions**: Both traditional (Android 11-) and new (Android 12+) permissions
+- **Location permissions**: Fine and coarse location access
+- **Foreground Service permissions**: For background scanning functionality
+- **Network permissions**: For API requests and creative content fetching
+- **Wake lock permissions**: For maintaining background scanning
+- **Notification permissions**: For displaying notifications
+- **Boot receiver permissions**: For auto-restart functionality
+
+#### Runtime Permission Handling
+
+Even though permissions are automatically merged from the AAR, the app still needs to request runtime permissions from users at runtime:
+
 - **Location Services**: Required for beacon detection and proximity monitoring
 - **Bluetooth**:
-  - Android 11 and below: `BLUETOOTH`, `BLUETOOTH_ADMIN`
-  - Android 12+: `BLUETOOTH_SCAN`, `BLUETOOTH_CONNECT` (new runtime permissions)
+  - Android 11 and below: `BLUETOOTH`, `BLUETOOTH_ADMIN` (auto-granted from manifest)
+  - Android 12+: `BLUETOOTH_SCAN`, `BLUETOOTH_CONNECT` (require runtime user authorization)
 - **Notifications**:
   - Android 12 and below: Automatically granted
-  - Android 13+: `POST_NOTIFICATIONS` (new runtime permission required)
-- **Battery Optimization**: Critical for background scanning reliability
+  - Android 13+: `POST_NOTIFICATIONS` (requires runtime user authorization)
+- **Battery Optimization**: Critical for background scanning reliability (handled by system settings)
 
 ## Development Setup
 
@@ -162,12 +204,11 @@ val clientProfile = ClientProfile(
     advertisingId = advertisingId
 )
 
-// 2. Configure SDK with environment
+// 2. Configure SDK
 val sdk = TenMaxAdBeaconSDK.getInstance(applicationContext)
 sdk.initiate(
     clientProfile = clientProfile,
-    callback = this,
-    environment = Environment.STAGE
+    callback = this
 )
 
 // 3. Handle beacon events
@@ -186,27 +227,71 @@ override fun onError(error: TenMaxAdBeaconError) {
 }
 ```
 
-### Permission Management
+### Permission Management Implementation
 
-Demonstrates comprehensive permission handling:
+The demo app demonstrates AAR-based permission handling using the SDK's built-in PermissionManager:
 
 ```kotlin
-private fun requestAllPermissions() {
-    val permissionsToRequest = mutableListOf<String>()
-    
-    // Check and request all required permissions
-    if (!hasLocationPermission()) {
-        permissionsToRequest.add(Manifest.permission.ACCESS_FINE_LOCATION)
+import com.tenmax.beacon.PermissionManager
+import androidx.core.app.ActivityCompat
+
+class MainActivity : AppCompatActivity() {
+
+    companion object {
+        private const val PERMISSION_REQUEST_CODE = 100
     }
-    
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        if (!hasBluetoothScanPermission()) {
-            permissionsToRequest.add(Manifest.permission.BLUETOOTH_SCAN)
+
+    private lateinit var permissionManager: PermissionManager
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // Initialize SDK's PermissionManager
+        // This works seamlessly with AAR integration
+        permissionManager = PermissionManager(this)
+
+        // Check and request permissions
+        checkPermissions()
+    }
+
+    private fun checkPermissions() {
+        // SDK's PermissionManager automatically handles all required permissions
+        // It knows about all permissions (both merged from AAR and runtime permissions)
+        val permissionResult = permissionManager.checkRequiredPermissions()
+
+        if (permissionResult.isGranted) {
+            // All permissions granted, initialize SDK
+            initializeSDKIfNeeded()
+        } else {
+            // Request missing runtime permissions only
+            // (Manifest permissions are already merged from AAR)
+            Log.d("TenMaxBeaconDemo", "Missing runtime permissions: ${permissionResult.missingPermissions}")
+            ActivityCompat.requestPermissions(
+                this,
+                permissionResult.missingPermissions.toTypedArray(),
+                PERMISSION_REQUEST_CODE
+            )
         }
     }
-    
-    if (permissionsToRequest.isNotEmpty()) {
-        ActivityCompat.requestPermissions(this, permissionsToRequest.toTypedArray(), PERMISSION_REQUEST_CODE)
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            // Re-check permissions after user response
+            val permissionResult = permissionManager.checkRequiredPermissions()
+
+            if (permissionResult.isGranted) {
+                initializeSDKIfNeeded()
+            } else {
+                // Handle permission denial
+                Log.w("TenMaxBeaconDemo", "Missing permissions: ${permissionResult.missingPermissions}")
+            }
+        }
     }
 }
 ```

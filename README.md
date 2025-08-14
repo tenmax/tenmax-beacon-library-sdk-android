@@ -1,6 +1,6 @@
 # TenMaxBeaconSDK for Android
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](../VERSION)
+[![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)](../VERSION)
 [![Platform](https://img.shields.io/badge/platform-Android%206.0%2B-lightgrey.svg)](https://developer.android.com/about/versions/marshmallow)
 [![Kotlin](https://img.shields.io/badge/kotlin-1.8.0%2B-orange.svg)](https://kotlinlang.org/)
 
@@ -14,7 +14,7 @@ A Kotlin library for integrating TenMax Beacon tracking functionality into Andro
 - **Beacon Deduplication**: Prevents processing duplicate beacon data within 30-second time windows (configurable)
 - **Network Connectivity**: Automatic network connectivity checking before API calls
 - **Notification Management**: Handles local notifications with click tracking and creative data content support
-- **Environment Support**: Separate configurations for staging and production environments
+
 - **Thread Safety**: All operations are thread-safe with proper concurrent queue management and automatic main thread callback execution
 - **Permission Management**: Comprehensive permission handling for Bluetooth, Location, and Notification permissions
 - **Auto-restart Support**: Automatic SDK restart after device boot
@@ -35,7 +35,7 @@ For a quick integration, follow these essential steps:
 
 1. **Copy the AAR file to your project**
    ```bash
-   cp libs/beacon-sdk-release.aar your-project/app/libs/
+   cp beacon-sdk-release.aar your-project/libs/
    ```
 
 2. **Configure build.gradle**
@@ -69,7 +69,6 @@ import com.tenmax.beacon.TenMaxAdBeaconCallback
 import com.tenmax.beacon.model.ClientProfile
 import com.tenmax.beacon.model.TenMaxAdCreative
 import com.tenmax.beacon.model.TenMaxAdBeaconError
-import com.tenmax.beacon.api.Environment
 
 // Create client profile
 val clientProfile = ClientProfile(
@@ -106,8 +105,7 @@ class BeaconCallback : TenMaxAdBeaconCallback {
 val sdk = TenMaxAdBeaconSDK.getInstance(applicationContext)
 sdk.initiate(
     clientProfile = clientProfile,
-    callback = BeaconCallback(),
-    environment = Environment.PRODUCTION
+    callback = BeaconCallback()
 )
 ```
 
@@ -116,7 +114,7 @@ sdk.initiate(
 The SDK follows a specific lifecycle pattern:
 
 1. **getInstance()**: Get SDK singleton instance
-2. **initiate()**: Initialize SDK with client profile, callback, and environment
+2. **initiate()**: Initialize SDK with client profile and callback
 3. **onInitialized()**: Callback triggered when initialization completes
 4. **start()**: Begin beacon scanning (typically called in onInitialized callback)
 5. **isScanning**: Property to check current scanning status (returns true when actively scanning)
@@ -132,14 +130,14 @@ val sdk = TenMaxAdBeaconSDK.getInstance(applicationContext)
 
 if (!sdk.isInitialized) {
     // Safe to initialize
-    sdk.initiate(clientProfile, callback, Environment.PRODUCTION)
+    sdk.initiate(clientProfile, callback)
 } else {
     // Already initialized, can start scanning
     sdk.start()
 }
 ```
 
-**Note**: You must specify the environment (`Environment.STAGE` or `Environment.PRODUCTION`) during initialization. Environment can only be set during initialization and cannot be changed later.
+
 
 ### Advanced Configuration
 
@@ -162,7 +160,6 @@ val notificationConfig = NotificationConfiguration(
 sdk.initiate(
     clientProfile = clientProfile,
     callback = callback,
-    environment = Environment.PRODUCTION,
     notificationConfig = notificationConfig
 )
 ```
@@ -207,7 +204,110 @@ The SDK requires several permissions to function properly:
 - **Foreground Service permissions**: For background scanning
 - **Notification permissions**: For displaying notifications (Android 13+)
 
+**AAR Integration**
+
+When using the pre-built AAR file, **all permissions are automatically merged** from the SDK into your app's final manifest during the build process. **You don't need to declare any permissions manually** in your AndroidManifest.xml:
+
+```xml
+<!-- AndroidManifest.xml -->
+<!-- No permission declarations needed! -->
+<!-- All SDK permissions are automatically merged from beacon-sdk-release.aar -->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.your.app">
+
+    <!-- Your app content only -->
+    <application
+        android:name=".YourApplication"
+        android:label="@string/app_name">
+
+        <!-- Your activities and components -->
+
+    </application>
+</manifest>
+```
+
+**How Permission Merging Works:**
+- Android build system automatically merges all `<uses-permission>` declarations from the AAR
+- Final APK contains all necessary permissions without manual declaration
+- No risk of missing or incorrect permission declarations
+- Automatic updates when SDK permission requirements change
+
 #### Permission Handling Best Practices
+
+**Method 1: Using SDK Built-in PermissionManager (Recommended)**
+
+The SDK provides a built-in `PermissionManager` that handles all permission checking logic:
+
+```kotlin
+import com.tenmax.beacon.PermissionManager
+import androidx.core.app.ActivityCompat
+
+class MainActivity : AppCompatActivity() {
+
+    companion object {
+        private const val PERMISSION_REQUEST_CODE = 100
+    }
+
+    private lateinit var permissionManager: PermissionManager
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // Initialize SDK's PermissionManager
+        permissionManager = PermissionManager(this)
+
+        // Check and request permissions
+        checkPermissions()
+    }
+
+    private fun checkPermissions() {
+        // Use SDK's PermissionManager to check all required permissions
+        val permissionResult = permissionManager.checkRequiredPermissions()
+
+        if (permissionResult.isGranted) {
+            // All permissions granted, initialize SDK
+            initializeSDK()
+        } else {
+            // Request missing permissions
+            ActivityCompat.requestPermissions(
+                this,
+                permissionResult.missingPermissions.toTypedArray(),
+                PERMISSION_REQUEST_CODE
+            )
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            // Re-check permissions after user response
+            val permissionResult = permissionManager.checkRequiredPermissions()
+
+            if (permissionResult.isGranted) {
+                initializeSDK()
+            } else {
+                // Handle permission denial
+                Log.w("BeaconDemo", "Missing permissions: ${permissionResult.missingPermissions}")
+            }
+        }
+    }
+
+    private fun initializeSDK() {
+        // Initialize SDK after all permissions are granted
+        // ... SDK initialization code
+    }
+}
+```
+
+**Method 2: Custom Permission Handling**
+
+If you prefer to implement your own permission handling:
 
 ```kotlin
 import android.Manifest
@@ -216,7 +316,7 @@ import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
-class PermissionManager(private val activity: Activity) {
+class CustomPermissionManager(private val activity: Activity) {
 
     companion object {
         private const val PERMISSION_REQUEST_CODE = 100

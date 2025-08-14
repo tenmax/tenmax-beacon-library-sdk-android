@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.tenmax.beacon.demo">
+
+    <!--
+    Note: ALL permissions are automatically merged from beacon-sdk-release.aar
+    No permission declarations needed in this manifest!
+    The SDK's AAR contains all necessary permissions.
+    -->
 
     <application
         android:name=".BeaconDemoApplication"

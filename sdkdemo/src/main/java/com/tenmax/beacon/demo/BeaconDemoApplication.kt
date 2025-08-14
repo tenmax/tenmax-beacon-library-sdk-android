@@ -1,12 +1,12 @@
 package com.tenmax.beacon.demo
 
 import android.app.Application
-import android.content.Context
 import android.util.Log
+import androidx.core.content.edit
 import com.google.android.gms.ads.identifier.AdvertisingIdClient
+import com.tenmax.beacon.PermissionManager
 import com.tenmax.beacon.TenMaxAdBeaconCallback
 import com.tenmax.beacon.TenMaxAdBeaconSDK
-import com.tenmax.beacon.api.Environment
 import com.tenmax.beacon.model.ClientProfile
 import com.tenmax.beacon.model.NotificationConfiguration
 import com.tenmax.beacon.model.TenMaxAdBeaconError
@@ -15,8 +15,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import androidx.core.content.edit
-import com.tenmax.beacon.PermissionManager
 
 /**
  * Application class responsible for SDK initialization and global configuration
@@ -113,7 +111,7 @@ class BeaconDemoApplication : Application(), TenMaxAdBeaconCallback {
             return
         }
         // Load saved user data
-        val prefs = getSharedPreferences("TenMaxBeaconDemo", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("TenMaxBeaconDemo", MODE_PRIVATE)
         val savedPhoneNumber = prefs.getString(KEY_USER_PHONE, null)
         val savedEmail = prefs.getString(KEY_USER_EMAIL, null)
 
@@ -143,7 +141,6 @@ class BeaconDemoApplication : Application(), TenMaxAdBeaconCallback {
         sdk.initiate(
             clientProfile = clientProfile,
             callback = this,
-            environment = Environment.STAGE,
             notificationConfig = notificationConfig
         )
 
@@ -160,7 +157,7 @@ class BeaconDemoApplication : Application(), TenMaxAdBeaconCallback {
      */
     fun updateUserProfile(phoneNumber: String?, email: String?) {
         // Save user data to settings
-        val prefs = getSharedPreferences("TenMaxBeaconDemo", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("TenMaxBeaconDemo", MODE_PRIVATE)
         prefs.edit().apply {
             putString(KEY_USER_PHONE, phoneNumber)
             putString(KEY_USER_EMAIL, email)
@@ -205,7 +202,7 @@ class BeaconDemoApplication : Application(), TenMaxAdBeaconCallback {
      * @return Pair of phone number and email
      */
     fun getSavedUserData(): Pair<String?, String?> {
-        val prefs = getSharedPreferences("TenMaxBeaconDemo", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("TenMaxBeaconDemo", MODE_PRIVATE)
         val phoneNumber = prefs.getString(KEY_USER_PHONE, null)
         val email = prefs.getString(KEY_USER_EMAIL, null)
         return Pair(phoneNumber, email)
