@@ -1,6 +1,6 @@
 # TenMaxBeaconSDK for Android
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](../VERSION)
+[![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)](../VERSION)
 [![Platform](https://img.shields.io/badge/platform-Android%206.0%2B-lightgrey.svg)](https://developer.android.com/about/versions/marshmallow)
 [![Kotlin](https://img.shields.io/badge/kotlin-1.8.0%2B-orange.svg)](https://kotlinlang.org/)
 
